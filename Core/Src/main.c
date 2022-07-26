@@ -58,6 +58,7 @@ char msg[]="30104E0953EA5C0F732A30114EB27231768475286237FF0C68C06D4B523060A87684
 float temperate=0;
 float ppm;
 extern  uint8_t RoG;
+uint16_t time=0;
 uint8_t USART1_RXbuff[10];
 uint8_t USART2_RXbuff[5];
 uint8_t USART3_RXbuff[10];
@@ -121,17 +122,11 @@ int main(void)
 	HAL_UART_Receive_IT(&huart2,USART2_RXbuff,1);
 	HAL_UART_Receive_IT(&huart3,USART3_RXbuff,4);
 	HAL_UART_Receive_IT(&huart4,(void *)&USART4_RXbuff,1);	
-	HAL_TIM_Base_Start_IT(&htim2);
-
-
-	
-	
-	//************发短信测试
-//	Sim900A_SendMsg2(msg,"13022045427");
 	
 	//************串口测试
 	char hdmi_n0msg[20];
 	int ppm1;
+	int time_flag=0;
 	HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);//开灯
   /* USER CODE END 2 */
 
@@ -153,12 +148,24 @@ int main(void)
 		//检测酒精，如果酒精超标就报警＋语音（卢东）
 		if(USART2_RXbuff[0]=='1')
 		{
-			memset(USART2_RXbuff,'\0',sizeof(USART2_RXbuff));
-			SYN_FrameInfo("[v6][t5]请在五秒内进行酒精检测"); 
-			HAL_Delay(5000);
-			if(if_alcohol==1)SYN_FrameInfo("[v6][t5]您已喝酒，请勿酒后开车");
-			else(SYN_FrameInfo("[v6][t5]检测完毕，祝您一路顺风"));
+			if(time_flag==0)
+			{			
+				SYN_FrameInfo("[v6][t5]请在五秒内进行酒精检测"); 
+				HAL_TIM_Base_Start_IT(&htim2);
+				time_flag=1;
+			}
+			
+			else if(time_flag==1 && time>=10)	//5s过去
+			{
+				HAL_TIM_Base_Stop_IT(&htim2);
+				time_flag=0;
+				memset(USART2_RXbuff,'\0',sizeof(USART2_RXbuff));
+				if(if_alcohol==1)SYN_FrameInfo("[v6][t5]您已喝酒，请勿酒后开车");
+				else(SYN_FrameInfo("[v6][t5]检测完毕，祝您一路顺风"));
+			}
 		}
+		
+		
 		//除红灯外，检测危险行为，有则语音播报加短信提醒（卢康）
 //		if(RoG==1)
 //		{
@@ -169,10 +176,13 @@ int main(void)
 		
 		if(warn[0]=='w'&&warn[1]=='a'&&warn[2]=='r'&&warn[3]=='n')
 		{
-			memset(warn,'\0',sizeof(warn));
+			HAL_UART_Transmit(&huart4, (uint8_t *)"1",1,0xFFFF);	//开启震动
 			warn_flag=1;
+			memset(warn,'\0',sizeof(warn));
+			HAL_UART_Transmit(&huart4, (uint8_t *)"1",1,0xFFFF);
 			SYN_FrameInfo("[v6][t5]检测到危险驾驶行为，请安全驾驶");
 			Sim900A_SendMsg2(msg,"13022045427");
+			HAL_UART_Transmit(&huart4, (uint8_t *)"0",1,0xFFFF);	//关闭震动
 			warn_flag=0;
 		}
 		//检测心率（东）
@@ -298,7 +308,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		if(htim->Instance == TIM2)
 		{
-					
+			time++;
+			if(time>10000)
+				time=0;	//防止越界
 		}
 }
 	
