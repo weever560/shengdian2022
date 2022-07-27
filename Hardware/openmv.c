@@ -42,12 +42,12 @@ void Openmv_Receive_Data(int16_t Com_Data)
           
 			RxState=1;
 			RxBuffer1[RxCounter1++]=Com_Data;
-      HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+//      HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 		}
 
 	else if(RxState==1&&Com_Data==0x12)  //0x12֡ͷ
 		{
-      HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+//      HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 			RxState=2;
 			RxBuffer1[RxCounter1++]=Com_Data;
 		}

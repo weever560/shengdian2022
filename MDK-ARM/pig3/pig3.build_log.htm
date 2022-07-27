@@ -27,7 +27,28 @@ Project File Date:  07/26/2022
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 1 (build 106)', folder: 'D:\MDK\ARM\ARMCC\Bin'
 Build target 'pig3'
-"pig3\pig3.axf" - 0 Error(s), 0 Warning(s).
+compiling main.c...
+../Hardware/sim900.h(41): warning:  #1-D: last line of file ends without a newline
+   
+../Hardware/hdmi.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+../Core/Src/main.c(130): warning:  #188-D: enumerated type mixed with another type
+        HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1);//¹ØµÆ
+../Core/Src/main.c(145): warning:  #223-D: function "memset" declared implicitly
+                memset(hdmi_n0msg,'\0',sizeof(hdmi_n0msg));
+../Core/Src/main.c(173): warning:  #188-D: enumerated type mixed with another type
+                        HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);//¿ªµÆ
+../Core/Src/main.c(186): warning:  #188-D: enumerated type mixed with another type
+                else    HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1);//¹ØµÆ
+../Core/Src/main.c(299): warning:  #223-D: function "memcpy" declared implicitly
+                memcpy(warn,USART3_RXbuff,sizeof(USART3_RXbuff));
+../Core/Src/main.c(300): warning:  #223-D: function "memset" declared implicitly
+                memset(USART3_RXbuff,'\0',sizeof(USART3_RXbuff));
+../Core/Src/main.c: 8 warnings, 0 errors
+linking...
+Program Size: Code=20094 RO-data=506 RW-data=268 ZI-data=2444  
+FromELF: creating hex file...
+"pig3\pig3.axf" - 0 Error(s), 8 Warning(s).
 
 <h2>Software Packages used:</h2>
 

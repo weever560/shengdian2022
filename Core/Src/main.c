@@ -127,7 +127,7 @@ int main(void)
 	char hdmi_n0msg[20];
 	int ppm1;
 	int time_flag=0;
-	HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);//开灯
+	HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1);//关灯
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -155,9 +155,10 @@ int main(void)
 				time_flag=1;
 			}
 			
-			else if(time_flag==1 && time>=10)	//5s过去
+			else if(time_flag==1 && time>=8)	//5s过去
 			{
 				HAL_TIM_Base_Stop_IT(&htim2);
+				time=0;
 				time_flag=0;
 				memset(USART2_RXbuff,'\0',sizeof(USART2_RXbuff));
 				if(if_alcohol==1)SYN_FrameInfo("[v6][t5]您已喝酒，请勿酒后开车");
@@ -166,25 +167,24 @@ int main(void)
 		}
 		
 		
-		//除红灯外，检测危险行为，有则语音播报加短信提醒（卢康）
-//		if(RoG==1)
-//		{
-//			//HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-//			RoG=0;
-//			HAL_Delay(1000);
-//		}
-		
-		if(warn[0]=='w'&&warn[1]=='a'&&warn[2]=='r'&&warn[3]=='n')
+		//******************除红灯外，检测危险行为，有则语音播报加短信提醒（卢康东）
+		if(RoG==1)
 		{
-			HAL_UART_Transmit(&huart4, (uint8_t *)"1",1,0xFFFF);	//开启震动
-			warn_flag=1;
-			memset(warn,'\0',sizeof(warn));
-			HAL_UART_Transmit(&huart4, (uint8_t *)"1",1,0xFFFF);
-			SYN_FrameInfo("[v6][t5]检测到危险驾驶行为，请安全驾驶");
-			Sim900A_SendMsg2(msg,"13022045427");
-			HAL_UART_Transmit(&huart4, (uint8_t *)"0",1,0xFFFF);	//关闭震动
-			warn_flag=0;
+			HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);//开灯
+			
+			if(warn[0]=='w'&&warn[1]=='a'&&warn[2]=='r'&&warn[3]=='n')
+			{
+				HAL_UART_Transmit(&huart4, (uint8_t *)"1",1,0xFFFF);	//开启震动
+				warn_flag=1;
+				memset(warn,'\0',sizeof(warn));
+				SYN_FrameInfo("[v6][t5]检测到危险驾驶行为，请安全驾驶");
+				Sim900A_SendMsg2(msg,"13022045427");
+				HAL_UART_Transmit(&huart4, (uint8_t *)"0",1,0xFFFF);	//关闭震动
+				warn_flag=0;
+			}
 		}
+		else 	HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,1);//关灯
+		
 		//检测心率（东）
 		
 		
@@ -253,12 +253,12 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if(GPIO_Pin==Alcohol_DO_Pin){
-	 HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);
+//	 HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,0);
 		if_alcohol=1;
 	}
 	if(GPIO_Pin==KEY_Pin){
 //	 HAL_GPIO(LED_GPIO_Port,LED_Pin,0);
-		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+//		HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
 			if_alcohol=0;
 	}						//酒精传感器引脚中断
 	
